@@ -1,0 +1,81 @@
+version: '3.8'
+services:
+  wordpress:
+    container_name: wordpress-wpd
+    restart: always
+    build:
+      dockerfile: Dockerfile # this line is actually redundant here - you need it only if you want to use some custom name for your Dockerfile
+      context: ./xdebug # a path to a directory containing a Dockerfile, or a URL to a git repository.
+    ports:
+      - "1337:80"
+    environment:
+      WORDPRESS_DB_HOST: mysql-wpd:3306
+      WORDPRESS_DB_NAME: mydbname
+      WORDPRESS_DB_USER: mydbuser
+      WORDPRESS_DB_PASSWORD: mydbpassword
+      #WORDPRESS_DEBUG: True
+      # Set the XDEBUG_CONFIG as described here: https://xdebug.org/docs/remote
+      #XDEBUG_CONFIG: remote_host=192.168.1.2 # change 192.168.1.2 to the IP of your host machine
+    depends_on:
+      - db
+    volumes:
+      - ./wp:/var/www/html
+    networks:
+      - backend-wpd
+      - frontend-wpd
+    deploy:
+      resources:
+        limits:
+          memory: 2048m
+    extra_hosts:
+      - host.docker.internal:host-gateway
+  db:
+    container_name: mysql-wpd
+    image: mysql:8.0.20
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mydbrootpassword
+      #MYSQL_RANDOM_ROOT_PASSWORD: '1' # You can use this instead of the option right above if you do not want to be able to login to MySQL under root
+      MYSQL_DATABASE: mydbname
+      MYSQL_USER: mydbuser
+      MYSQL_PASSWORD: mydbpassword
+    ports:
+      -  "3306:3306" # I prefer to keep the ports available for external connections in the development environment to be able to work with the database
+                     # from programs like e.g. HeidiSQL on Windows or DBeaver on Mac.
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+        backend-wpd:
+            aliases:
+                - mysql
+  wpcli:
+    image: wordpress:cli-php8.0
+    volumes_from:
+      - wordpress
+    depends_on:
+      - db
+      - wordpress
+    user: "33:33"
+    entrypoint: wp
+    command: "--info"
+    environment:
+      WORDPRESS_DB_HOST: mysql-wpd:3306
+      WORDPRESS_DB_NAME: mydbname
+      WORDPRESS_DB_USER: mydbuser
+      WORDPRESS_DB_PASSWORD: mydbpassword
+    networks:
+      - backend-wpd
+  mailcatcher:
+    container_name: mailcatcher
+    image: schickling/mailcatcher
+    networks:
+      - backend-wpd
+      - frontend-wpd
+    ports:
+      -  "1025:1025"
+      -  "1080:1080"
+
+networks:
+  frontend-wpd:
+  backend-wpd:
