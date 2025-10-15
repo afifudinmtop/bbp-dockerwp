@@ -27,8 +27,8 @@ This repository contains **two** lab environments for testing against different 
 1. **Clone this repository:**
 
    ```bash
-   git clone https://github.com/wordfence/dockerwp-lab.git
-   cd dockerwp-lab
+   git clone https://github.com/wordfence/bbp-dockerwp
+   cd bbp-dockerwp
 
 2. **Choose a lab environment:**
 
