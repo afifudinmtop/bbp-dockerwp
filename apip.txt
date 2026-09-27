@@ -1,0 +1,6 @@
+Untuk dockerwp74 reset total (file + DB):
+cd /mnt/c/Users/ThinkPad/Desktop/bounty/bbp-dockerwp/dockerwp74
+sudo docker compose down
+sudo rm -rf wp/* mysql/*
+sudo docker compose up -d
+Buka http://localhost:1337 install ulang.
