@@ -41,10 +41,10 @@ services:
       MYSQL_USER: mydbuser
       MYSQL_PASSWORD: mydbpassword
     ports:
-      -  "3306:3306" # I prefer to keep the ports available for external connections in the development environment to be able to work with the database
+      -  "3307:3306" # changed from 3306 to avoid clash with XAMPP MySQL on Windows host
                      # from programs like e.g. HeidiSQL on Windows or DBeaver on Mac.
     volumes:
-      - ./mysql:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     networks:
         backend-wpd:
             aliases:
@@ -79,3 +79,6 @@ services:
 networks:
   frontend-wpd:
   backend-wpd:
+
+volumes:
+  mysql_data:
